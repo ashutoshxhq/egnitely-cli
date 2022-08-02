@@ -1,4 +1,13 @@
 use clap::{Parser, Subcommand};
+use create::create_function;
+use login::login;
+use logout::logout;
+
+use crate::publish::publish_function;
+mod login;
+mod logout;
+mod create;
+mod publish;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -34,28 +43,26 @@ fn main() {
 
     match &cli.command {
         Some(Commands::Publish) => {
-            println!("Publish Called")
+            let _res = publish_function();
         }
         Some(Commands::Push) => {
-            println!("Push Called")
+            let _res = publish_function();
         }
         Some(Commands::New { name }) => {
-            println!("New Called");
             if let Some(name) = name {
-                println!("Value: {}", name);
+                let _res = create_function(name.clone());
             }
         }
         Some(Commands::Create { name }) => {
-            println!("Create Called");
             if let Some(name) = name {
-                println!("Value: {}", name);
+                let _res = create_function(name.clone());
             }
         }
         Some(Commands::Login) => {
-            println!("Login Called")
+            let _res = login();
         }
         Some(Commands::Logout) => {
-            println!("Logout Called")
+            let _res = logout();
         }
         None => {
             println!("Version: 0.1.0")
