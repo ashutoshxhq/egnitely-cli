@@ -1,7 +1,7 @@
 use serde_json::{json, Value};
 use std::error::Error;
 
-use crate::generator::EgnitelyGenerator;
+use crate::{generator::EgnitelyGenerator, authn::EgnitelyAuthN};
 
 #[derive(Debug)]
 pub enum EgnitelyResource {
@@ -17,8 +17,21 @@ impl EgnitelyHandler {
         EgnitelyHandler {}
     }
 
-    pub fn login(&self, email: String, password: String) -> Result<Value, Box<dyn Error>> {
-        println!("Login to egnitely account");
+    pub async fn login(&self) -> Result<Value, Box<dyn Error>> {
+        println!("Login to your Egnitely account");
+        println!("Enter your email:");
+        let mut email = String::new();
+        let _b1 = std::io::stdin().read_line(&mut email).unwrap();
+        println!("");
+        let mut password = String::new();
+        println!("Enter your password:");
+        let _b1 = std::io::stdin().read_line(&mut password).unwrap();
+        println!("");
+        let authn = EgnitelyAuthN::new();
+        email.truncate(email.clone().len() - 2);
+
+        password.truncate(password.clone().len() - 2);
+        authn.login(email, password).await?;
         Ok(json!({}))
     }
 

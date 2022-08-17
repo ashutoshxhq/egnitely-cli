@@ -3,9 +3,12 @@ mod provider;
 mod template;
 mod generator;
 mod handler;
+mod authn;
+mod authz;
 
 use clap::{Parser, Subcommand};
 use handler:: {EgnitelyHandler, EgnitelyResource};
+use std::thread;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -78,7 +81,8 @@ enum DeleteCommand {
     },
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
     let egnitely = EgnitelyHandler::new();
     match &cli.command {
@@ -126,7 +130,7 @@ fn main() {
             let _res = egnitely.apply_template(_file.clone());
         },
         Some(Commands::Login) => {
-            let _res = egnitely.login("".to_string(), "".to_string());
+            let _res = egnitely.login().await;
         }
         Some(Commands::Logout) => {
             let _res = egnitely.logout();
@@ -135,4 +139,5 @@ fn main() {
             println!("Version: 0.1.0")
         }
     }
+    
 }
