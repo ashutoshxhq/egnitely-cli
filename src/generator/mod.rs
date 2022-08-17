@@ -17,7 +17,7 @@ impl EgnitelyGenerator {
     pub fn generate_function(&self) -> Result<(), Box<dyn Error>> {
         let rust_gen = RustGenerator::new(self.name.clone());
         rust_gen.generate_lib()?;
-        println!("{} egnitely function: name=`{}` language=`{}`","Created".bold().green(), self.name.bold(), self.language.bold());
+        println!("{} egnitely function: name=`{}` language=`{}`","Created".bold().green(), self.name.bold().blue(), self.language.bold().blue());
         Ok(())
     }
 }
