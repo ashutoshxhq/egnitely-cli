@@ -1,6 +1,8 @@
 use serde_json::{json, Value};
 use std::error::Error;
 
+use crate::generator::EgnitelyGenerator;
+
 #[derive(Debug)]
 pub enum EgnitelyResource {
     Function,
@@ -41,7 +43,8 @@ impl EgnitelyHandler {
     }
 
     pub fn create_function(&self, name: String) -> Result<Value, Box<dyn Error>> {
-        println!("Create function named: {}", name);
+        let generator = EgnitelyGenerator::new(name, "rust".to_string());
+        generator.generate_function()?;
         Ok(json!({}))
     }
 
