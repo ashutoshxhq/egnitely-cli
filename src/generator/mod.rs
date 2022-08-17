@@ -1,5 +1,5 @@
 use std::error::Error;
-
+use colored::*;
 use self::rust_generator::RustGenerator;
 
 mod rust_generator;
@@ -15,13 +15,9 @@ impl EgnitelyGenerator {
     }
 
     pub fn generate_function(&self) -> Result<(), Box<dyn Error>> {
-        println!("Creating new function");
-        println!("Function Name: {}", self.name);
-        println!("Language: {}", self.language);
-        
         let rust_gen = RustGenerator::new(self.name.clone());
         rust_gen.generate_lib()?;
-
+        println!("{} egnitely function: name=`{}` language=`{}`","Created".bold().green(), self.name.bold(), self.language.bold());
         Ok(())
     }
 }
