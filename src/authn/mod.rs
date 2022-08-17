@@ -1,5 +1,6 @@
 use serde_json::{json, Value};
 use std::{error::Error};
+use colored::*;
 
 pub struct EgnitelyAuthN {}
 
@@ -14,13 +15,11 @@ impl EgnitelyAuthN {
             "email": email.clone(),
             "password": password.clone()
         });
-        println!("Data: {:?}", data);
         let req = reqwest::Client::new().post("https://dev.api.egnitely.com/auth/login")
         .json(&data);
-
         let res: Value = req.send().await?.json().await?;
 
-        println!("Login Response: {:#?}", res);
+        println!("{}", "Successfully Logged In".green().bold());
         Ok(json!({}))
     }
 
