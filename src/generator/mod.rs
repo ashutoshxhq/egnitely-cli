@@ -15,9 +15,12 @@ impl EgnitelyGenerator {
     }
 
     pub fn generate_function(&self) -> Result<(), Box<dyn Error>> {
+        println!("Creating new function");
+        println!("Function Name: {}", self.name);
+        println!("Language: {}", self.language);
+        
         let rust_gen = RustGenerator::new(self.name.clone());
         rust_gen.generate_lib()?;
-        println!("Created rust function");
 
         Ok(())
     }
