@@ -1,8 +1,10 @@
 use colored::*;
+use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
+use std::path::Path;
 use std::{collections::HashMap, error::Error};
-use std::{thread, time};
+use std::{fs, thread, time};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DeviceCodeResponse {
@@ -67,10 +69,10 @@ impl EgnitelyAuthN {
         );
         println!("");
         match open::that(device_code_res.verification_uri_complete) {
-            Ok(()) => {},
+            Ok(()) => {}
             Err(_err) => {
                 println!("Unable to open browser, please manualy open the link.")
-            },
+            }
         }
 
         let mut token_params = HashMap::new();
@@ -100,6 +102,34 @@ impl EgnitelyAuthN {
                     let token_data = serde_json::from_value::<TokenSuccessResponse>(token_res);
                     match token_data {
                         Ok(_token_data) => {
+                            if !(Path::new(&dirs::home_dir().unwrap().join(".egnitely")).is_dir()) {
+                                fs::create_dir(dirs::home_dir().unwrap().join(".egnitely"))?;
+                                let mut db = PickleDb::new(
+                                    dirs::home_dir()
+                                        .unwrap()
+                                        .join(".egnitely")
+                                        .join("credentials.db"),
+                                    PickleDbDumpPolicy::AutoDump,
+                                    SerializationMethod::Json,
+                                );
+                                db.set("access_token", &_token_data.access_token).unwrap();
+                                db.set("refresh_token", &_token_data.refresh_token).unwrap();
+                                db.set("id_token", &_token_data.id_token).unwrap();
+                            } else {
+                                let mut db = PickleDb::load(
+                                    dirs::home_dir()
+                                        .unwrap()
+                                        .join(".egnitely")
+                                        .join("credentials.db"),
+                                    PickleDbDumpPolicy::DumpUponRequest,
+                                    SerializationMethod::Json,
+                                )
+                                .unwrap();
+                                db.set("access_token", &_token_data.access_token).unwrap();
+                                db.set("refresh_token", &_token_data.refresh_token).unwrap();
+                                db.set("id_token", &_token_data.id_token).unwrap();
+                            }
+
                             println!("");
                             println!("{}", "Successfully Logged In".green().bold());
                             break;
@@ -118,6 +148,20 @@ impl EgnitelyAuthN {
     }
 
     pub async fn logout(&self) -> Result<(), Box<dyn Error>> {
+        if Path::new(&dirs::home_dir().unwrap().join(".egnitely")).is_dir() {
+            let mut db = PickleDb::load(
+                dirs::home_dir()
+                    .unwrap()
+                    .join(".egnitely")
+                    .join("credentials.db"),
+                PickleDbDumpPolicy::DumpUponRequest,
+                SerializationMethod::Json,
+            )
+            .unwrap();
+            db.rem("access_token").unwrap();
+            db.rem("refresh_token").unwrap();
+            db.rem("id_token").unwrap();
+        }
         println!("Logout Triggered");
         Ok(())
     }

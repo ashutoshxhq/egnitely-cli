@@ -5,7 +5,7 @@ mod generator;
 mod handler;
 mod authn;
 mod authz;
-
+extern crate dirs;
 use clap::{Parser, Subcommand};
 use handler:: {EgnitelyHandler, EgnitelyResource};
 
@@ -22,6 +22,11 @@ enum Commands {
     Push,
     /// Create a new Egnitely Function
     Create {
+        #[clap(value_parser)]
+        name: Option<String>,
+    },
+    /// Create a new Egnitely Function
+    New {
         #[clap(value_parser)]
         name: Option<String>,
     },
@@ -88,6 +93,9 @@ async fn main() {
         Some(Commands::Create { name }) => if let Some(_name) = name {
             let _res = egnitely.create_function(_name.clone());
         },
+        Some(Commands::New { name }) => if let Some(_name) = name {
+            let _res = egnitely.create_function(_name.clone());
+        },
         Some(Commands::Trigger { file }) => if let Some(_file) = file {
             let _res = egnitely.trigger_function(_file.clone());
         },
@@ -133,7 +141,7 @@ async fn main() {
             
         }
         Some(Commands::Logout) => {
-            let _res = egnitely.logout();
+            let _res = egnitely.logout().await;
         }
         None => {
             println!("Version: 0.1.0")
