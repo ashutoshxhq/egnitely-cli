@@ -8,7 +8,6 @@ mod authz;
 
 use clap::{Parser, Subcommand};
 use handler:: {EgnitelyHandler, EgnitelyResource};
-use std::thread;
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -131,6 +130,7 @@ async fn main() {
         },
         Some(Commands::Login) => {
             let _res = egnitely.login().await;
+            
         }
         Some(Commands::Logout) => {
             let _res = egnitely.logout();

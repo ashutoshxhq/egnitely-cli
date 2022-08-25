@@ -1,6 +1,5 @@
 use serde_json::{json, Value};
-use std::error::Error;
-use std::io::Write;
+use std::{error::Error};
 
 use crate::{generator::EgnitelyGenerator, authn::EgnitelyAuthN};
 
@@ -19,27 +18,14 @@ impl EgnitelyHandler {
     }
 
     pub async fn login(&self) -> Result<Value, Box<dyn Error>> {
-        println!("Login to your Egnitely Account");
-        println!("");
-
-        print!("Enter your email: ");
-        std::io::stdout().flush().unwrap();
-        let mut email = String::new();
-        let _b1 = std::io::stdin().read_line(&mut email).unwrap();
-
-        print!("Enter your password: ");
-        std::io::stdout().flush().unwrap();
-        let password = rpassword::read_password().unwrap();
-        println!("");
-
         let authn = EgnitelyAuthN::new();
-        email.truncate(email.clone().len() - 2);
-        authn.login(email, password).await?;
+        authn.login().await?;
         Ok(json!({}))
     }
 
-    pub fn logout(&self) -> Result<Value, Box<dyn Error>> {
-        println!("Logout of egnitely");
+    pub async fn logout(&self) -> Result<Value, Box<dyn Error>> {
+        let authn = EgnitelyAuthN::new();
+        authn.logout().await?;
         Ok(json!({}))
     }
 
@@ -72,7 +58,7 @@ impl EgnitelyHandler {
     pub fn delete_resource(
         &self,
         resource_name: EgnitelyResource,
-        id: String,
+        _id: String,
     ) -> Result<Value, Box<dyn Error>> {
         println!("Create function named: {:?}", resource_name);
         Ok(json!({}))
