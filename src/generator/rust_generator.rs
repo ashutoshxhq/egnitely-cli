@@ -11,11 +11,11 @@ impl RustGenerator {
     }
 
     pub fn generate_lib(&self) -> Result<(), Box<dyn Error>> {
-        let lib_rs = "use egnitely_client::RequestContext;\nuse std::error::Error;\nuse serde_json::{json, Value};\n\npub async fn handler(mut _ctx: RequestContext, _input: Value) -> Result<Value, Box<dyn Error>> {\n\t// TODO: IMPLEMENT FUNCTION\n\t\n\tOk(json!({\n\t\t    \"message\": \"function executed successfully\"\n\t}))\n}\n\n#[cfg(test)]\nmod tests {\n\t use super::*;\n\n\t#[tokio::test]\n\tasync fn trigger_handler() {\n\n\t\tlet resp = handler(\n\t\t\tRequestContext::new(\"\".to_string(), \"\".to_string(), None, json!({}), json!({})),\n\t\t\tjson!({}),\n\t\t)\n\t\t.await\n\t\t.unwrap();\n\t\t\n\t\tassert_eq!(\"function executed successfully\", resp[\"message\"])\n\t}\n}\n".to_string();
+        let lib_rs = "use egnitely_client::{RequestContext, Result};\nuse std::error::Error;\nuse serde_json::{json, Value};\n\npub async fn handler(mut _ctx: RequestContext, _input: Value) -> Result<Value> {\n\t// TODO: IMPLEMENT FUNCTION\n\t\n\tOk(json!({\n\t\t    \"message\": \"function executed successfully\"\n\t}))\n}\n\n#[cfg(test)]\nmod tests {\n\t use super::*;\n\n\t#[tokio::test]\n\tasync fn trigger_handler() {\n\n\t\tlet resp = handler(\n\t\t\tRequestContext::new(\"\".to_string(), \"\".to_string(), None, json!({}), json!({})),\n\t\t\tjson!({}),\n\t\t)\n\t\t.await\n\t\t.unwrap();\n\t\t\n\t\tassert_eq!(\"function executed successfully\", resp[\"message\"])\n\t}\n}\n".to_string();
 
         let mut cargo_toml = "[package] \nname = \"".to_string();
         cargo_toml.push_str(&self.name);
-        cargo_toml.push_str("\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html\n\n[dependencies]\nserde = { version = \"1.0.137\", features = [\"derive\"] }\nserde_json = \"1.0.81\"\negnitely-client = { git=\"https://github.com/egnitely/egnitely-client-lib.git\", version=\"0.1.0\" }\naws-config = \"0.47.0\"\ntokio = { version = \"1\", features = [\"full\"] }");
+        cargo_toml.push_str("\"\nversion = \"0.1.0\"\nedition = \"2021\"\n\n# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html\n\n[dependencies]\nserde = { version = \"1.0.137\", features = [\"derive\"] }\nserde_json = \"1.0.81\"\negnitely_client = \"0.1.0\"\naws-config = \"0.47.0\"\ntokio = { version = \"1\", features = [\"full\"] }");
 
         let gitignore = "/target\n/Cargo.lock";
 
