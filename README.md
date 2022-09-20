@@ -1,2 +1,2 @@
-# egnitely-cli
+# egnite-cli
 CLI tool for creating boilerplates and managing functions.
