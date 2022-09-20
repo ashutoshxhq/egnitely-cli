@@ -12,8 +12,10 @@ serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }
 colored = "2.0.0"
 tokio = { version = "1", features = ["full"] }
-reqwest = { version = "0.11", features = ["json"] }
+reqwest = { version = "0.11", features = ["json", "multipart", "blocking"] }
 rpassword = "7.0.0"
 open = "3.0.2"
 pickledb = "0.5.1"
 dirs = "4.0"
+walkdir = "2.3.2"
+zip = "0.6.2"

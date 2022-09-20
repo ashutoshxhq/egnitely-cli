@@ -52,11 +52,9 @@ impl EgnitelyAuthN {
             .form(&params);
         let device_code_res = device_code_req
             .send()
-            .await
-            .unwrap()
+            .await?
             .json::<DeviceCodeResponse>()
-            .await
-            .unwrap();
+            .await?;
         println!("");
         println!("");
         println!(
@@ -84,13 +82,7 @@ impl EgnitelyAuthN {
             let token_req = client
                 .post("https://dev-qgdysq-r.us.auth0.com/oauth/token")
                 .form(&token_params);
-            let token_res = token_req
-                .send()
-                .await
-                .unwrap()
-                .json::<Value>()
-                .await
-                .unwrap();
+            let token_res = token_req.send().await?.json::<Value>().await?;
             let error = serde_json::from_value::<TokenErrorResponse>(token_res.clone());
             match error {
                 Ok(err) => {
@@ -102,37 +94,32 @@ impl EgnitelyAuthN {
                     let token_data = serde_json::from_value::<TokenSuccessResponse>(token_res);
                     match token_data {
                         Ok(_token_data) => {
-                            if !(Path::new(&dirs::home_dir().unwrap().join(".egnitely")).is_dir()) {
-                                fs::create_dir(dirs::home_dir().unwrap().join(".egnitely"))?;
-                                let mut db = PickleDb::new(
-                                    dirs::home_dir()
-                                        .unwrap()
-                                        .join(".egnitely")
-                                        .join("credentials.db"),
-                                    PickleDbDumpPolicy::AutoDump,
-                                    SerializationMethod::Json,
-                                );
-                                db.set("access_token", &_token_data.access_token).unwrap();
-                                db.set("refresh_token", &_token_data.refresh_token).unwrap();
-                                db.set("id_token", &_token_data.id_token).unwrap();
-                            } else {
-                                let mut db = PickleDb::load(
-                                    dirs::home_dir()
-                                        .unwrap()
-                                        .join(".egnitely")
-                                        .join("credentials.db"),
-                                    PickleDbDumpPolicy::DumpUponRequest,
-                                    SerializationMethod::Json,
-                                )
-                                .unwrap();
-                                db.set("access_token", &_token_data.access_token).unwrap();
-                                db.set("refresh_token", &_token_data.refresh_token).unwrap();
-                                db.set("id_token", &_token_data.id_token).unwrap();
-                            }
+                            if let Some(home_dir) = dirs::home_dir() {
+                                if !(Path::new(&home_dir.join(".egnitely")).is_dir()) {
+                                    fs::create_dir(home_dir.join(".egnitely"))?;
+                                    let mut db = PickleDb::new(
+                                        home_dir.join(".egnitely").join("credentials.db"),
+                                        PickleDbDumpPolicy::AutoDump,
+                                        SerializationMethod::Json,
+                                    );
+                                    db.set("access_token", &_token_data.access_token)?;
+                                    db.set("refresh_token", &_token_data.refresh_token)?;
+                                    db.set("id_token", &_token_data.id_token)?;
+                                } else {
+                                    let mut db = PickleDb::load(
+                                        home_dir.join(".egnitely").join("credentials.db"),
+                                        PickleDbDumpPolicy::DumpUponRequest,
+                                        SerializationMethod::Json,
+                                    )?;
+                                    db.set("access_token", &_token_data.access_token)?;
+                                    db.set("refresh_token", &_token_data.refresh_token)?;
+                                    db.set("id_token", &_token_data.id_token)?;
+                                }
 
-                            println!("");
-                            println!("{}", "Successfully Logged In".green().bold());
-                            break;
+                                println!("");
+                                println!("{}", "Successfully Logged In".green().bold());
+                                break;
+                            }
                         }
                         Err(err) => {
                             println!("Something went wrong, Error Decoding: {:?}", err);
@@ -148,19 +135,17 @@ impl EgnitelyAuthN {
     }
 
     pub async fn logout(&self) -> Result<(), Box<dyn Error>> {
-        if Path::new(&dirs::home_dir().unwrap().join(".egnitely")).is_dir() {
-            let mut db = PickleDb::load(
-                dirs::home_dir()
-                    .unwrap()
-                    .join(".egnitely")
-                    .join("credentials.db"),
-                PickleDbDumpPolicy::DumpUponRequest,
-                SerializationMethod::Json,
-            )
-            .unwrap();
-            db.rem("access_token").unwrap();
-            db.rem("refresh_token").unwrap();
-            db.rem("id_token").unwrap();
+        if let Some(home_dir) = dirs::home_dir() {
+            if Path::new(&home_dir.join(".egnitely")).is_dir() {
+                let mut db = PickleDb::load(
+                    home_dir.join(".egnitely").join("credentials.db"),
+                    PickleDbDumpPolicy::DumpUponRequest,
+                    SerializationMethod::Json,
+                )?;
+                db.rem("access_token")?;
+                db.rem("refresh_token")?;
+                db.rem("id_token")?;
+            }
         }
         println!("Logout Triggered");
         Ok(())

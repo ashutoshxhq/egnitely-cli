@@ -100,7 +100,7 @@ async fn main() {
             let _res = egnitely.trigger_function(_file.clone());
         },
         Some(Commands::Push) => {
-            let _res = egnitely.push_function();
+            let _res = egnitely.push_function().await;
         }
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
