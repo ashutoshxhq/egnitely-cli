@@ -19,7 +19,10 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     /// Push the function to Egnitely
-    Push,
+    Push {
+        #[clap(short, long)]
+        project: Option<String>,
+    },
     /// Create a new Egnitely Function
     Create {
         #[clap(value_parser)]
@@ -85,6 +88,7 @@ enum DeleteCommand {
     },
 }
 
+
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
@@ -99,8 +103,8 @@ async fn main() {
         Some(Commands::Trigger { file }) => if let Some(_file) = file {
             let _res = egnitely.trigger_function(_file.clone());
         },
-        Some(Commands::Push) => {
-            let _res = egnitely.push_function().await.unwrap();
+        Some(Commands::Push{ project }) =>if let Some(project) = project {
+            let _res = egnitely.push_function(project.clone()).await.unwrap();
         }
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
@@ -137,7 +141,7 @@ async fn main() {
             let _res = egnitely.apply_template(_file.clone());
         },
         Some(Commands::Login) => {
-            let _res = egnitely.login().await;
+            let _res = egnitely.login().await.unwrap();
             
         }
         Some(Commands::Logout) => {

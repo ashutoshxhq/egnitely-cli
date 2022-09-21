@@ -98,7 +98,7 @@ impl EgnitelyAuthN {
                                 if !(Path::new(&home_dir.join(".egnitely")).is_dir()) {
                                     fs::create_dir(home_dir.join(".egnitely"))?;
                                     let mut db = PickleDb::new(
-                                        home_dir.join(".egnitely").join("credentials.db"),
+                                        home_dir.join(".egnitely").join("credentials"),
                                         PickleDbDumpPolicy::AutoDump,
                                         SerializationMethod::Json,
                                     );
@@ -106,16 +106,26 @@ impl EgnitelyAuthN {
                                     db.set("refresh_token", &_token_data.refresh_token)?;
                                     db.set("id_token", &_token_data.id_token)?;
                                 } else {
-                                    let mut db = PickleDb::load(
-                                        home_dir.join(".egnitely").join("credentials.db"),
-                                        PickleDbDumpPolicy::DumpUponRequest,
-                                        SerializationMethod::Json,
-                                    )?;
-                                    db.set("access_token", &_token_data.access_token)?;
-                                    db.set("refresh_token", &_token_data.refresh_token)?;
-                                    db.set("id_token", &_token_data.id_token)?;
+                                    if !(Path::new(&home_dir.join(".egnitely").join("credentials")).is_file()) {
+                                        let mut db = PickleDb::new(
+                                            home_dir.join(".egnitely").join("credentials"),
+                                            PickleDbDumpPolicy::AutoDump,
+                                            SerializationMethod::Json,
+                                        );
+                                        db.set("access_token", &_token_data.access_token)?;
+                                        db.set("refresh_token", &_token_data.refresh_token)?;
+                                        db.set("id_token", &_token_data.id_token)?;
+                                    } else{
+                                        let mut db = PickleDb::load(
+                                            home_dir.join(".egnitely").join("credentials"),
+                                            PickleDbDumpPolicy::DumpUponRequest,
+                                            SerializationMethod::Json,
+                                        )?;
+                                        db.set("access_token", &_token_data.access_token)?;
+                                        db.set("refresh_token", &_token_data.refresh_token)?;
+                                        db.set("id_token", &_token_data.id_token)?;
+                                    }
                                 }
-
                                 println!("");
                                 println!("{}", "Successfully Logged In".green().bold());
                                 break;
@@ -138,7 +148,7 @@ impl EgnitelyAuthN {
         if let Some(home_dir) = dirs::home_dir() {
             if Path::new(&home_dir.join(".egnitely")).is_dir() {
                 let mut db = PickleDb::load(
-                    home_dir.join(".egnitely").join("credentials.db"),
+                    home_dir.join(".egnitely").join("credentials"),
                     PickleDbDumpPolicy::DumpUponRequest,
                     SerializationMethod::Json,
                 )?;

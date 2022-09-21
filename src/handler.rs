@@ -47,7 +47,7 @@ impl EgnitelyHandler {
         Ok(())
     }
 
-    pub async fn push_function(&self) -> Result<(), Box<dyn Error>> {
+    pub async fn push_function(&self, project: String) -> Result<(), Box<dyn Error>> {
         let contents = fs::read_to_string("Cargo.toml")?;
         let data: CargoTomlSchema = toml::from_str(&contents)?;
 
@@ -98,7 +98,7 @@ impl EgnitelyHandler {
 
         let function = Function::new(data.package.name.clone(), data.package.version.clone());
         function.zip_function().await?;
-        function.upload_function().await?;
+        function.upload_function(project).await?;
 
         pb.finish_and_clear();
         println!(
