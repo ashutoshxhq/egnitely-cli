@@ -1,11 +1,26 @@
-use std::error::Error;
 use crate::{authn::EgnitelyAuthN, function::Function, generator::EgnitelyGenerator};
+use colored::*;
+use indicatif::{ProgressBar, ProgressStyle};
+use serde::Deserialize;
+use std::fs;
+use std::{error::Error, time::Duration};
 
 #[derive(Debug)]
 pub enum EgnitelyResource {
     Function,
     Provider,
     AppTemplate,
+}
+
+#[derive(Deserialize, Clone)]
+struct CargoTomlSchema {
+    package: Package,
+}
+
+#[derive(Deserialize, Clone)]
+struct Package {
+    name: String,
+    version: String,
 }
 
 pub struct EgnitelyHandler {}
@@ -33,10 +48,66 @@ impl EgnitelyHandler {
     }
 
     pub async fn push_function(&self) -> Result<(), Box<dyn Error>> {
-        println!("Push function to egnitely");
-        let function = Function::new();
+        let contents = fs::read_to_string("Cargo.toml")?;
+        let data: CargoTomlSchema = toml::from_str(&contents)?;
+
+        println!(
+            "{} {} to generate input and output schema (might take a minute or two)",
+            "Compiling".blue().bold(),
+            data.package.name.clone(),
+        );
+
+        let pb = ProgressBar::new_spinner();
+        pb.enable_steady_tick(Duration::from_millis(120));
+        pb.set_style(
+            ProgressStyle::with_template("{msg:.green} {spinner:.green}")
+                .unwrap()
+                // For more spinners check out the cli-spinners project:
+                // https://github.com/sindresorhus/cli-spinners/blob/master/spinners.json
+                .tick_strings(&[
+                    "▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱",
+                    "▰▰▱▱▱▱▱▱▱▱▱▱▱▱▱",
+                    "▰▰▰▱▱▱▱▱▱▱▱▱▱▱▱",
+                    "▰▰▰▰▱▱▱▱▱▱▱▱▱▱▱",
+                    "▰▰▰▰▰▱▱▱▱▱▱▱▱▱▱",
+                    "▰▰▰▰▰▰▱▱▱▱▱▱▱▱▱",
+                    "▰▰▰▰▰▰▰▱▱▱▱▱▱▱▱",
+                    "▰▰▰▰▰▰▰▰▱▱▱▱▱▱▱",
+                    "▰▰▰▰▰▰▰▰▰▱▱▱▱▱▱",
+                    "▰▰▰▰▰▰▰▰▰▰▱▱▱▱▱",
+                    "▰▰▰▰▰▰▰▰▰▰▰▱▱▱▱",
+                    "▰▰▰▰▰▰▰▰▰▰▰▰▱▱▱",
+                    "▰▰▰▰▰▰▰▰▰▰▰▰▰▱▱",
+                    "▰▰▰▰▰▰▰▰▰▰▰▰▰▰▱",
+                    "▰▰▰▰▰▰▰▰▰▰▰▰▰▰▰",
+                    "▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱",
+                ]),
+        );
+        pb.set_message("Compiling");
+
+        let generator = EgnitelyGenerator::new(data.package.name.clone(), "rust".to_string());
+        generator.generate_application()?;
+
+        println!(
+            "{} {} {} to Egnitely",
+            "Uploading".blue().bold(),
+            data.package.name.clone(),
+            data.package.version.clone()
+        );
+        pb.set_message("Uploading");
+
+        let function = Function::new(data.package.name.clone(), data.package.version.clone());
         function.zip_function().await?;
         function.upload_function().await?;
+
+        pb.finish_and_clear();
+        println!(
+            "{} {} {} to Egnitely",
+            "Pushed".green().bold(),
+            data.package.name,
+            data.package.version
+        );
+
         Ok(())
     }
 

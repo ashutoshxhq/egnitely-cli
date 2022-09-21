@@ -1,8 +1,11 @@
+mod entities;
 use pickledb::PickleDb;
 use pickledb::PickleDbDumpPolicy;
 use pickledb::SerializationMethod;
+use serde_json::json;
 use std::error::Error;
 use std::ffi::OsStr;
+use std::fs;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::Write;
@@ -11,15 +14,21 @@ use std::path::{Component, Path};
 use walkdir::WalkDir;
 use zip::write::FileOptions;
 
-pub struct Function {}
+use crate::function::entities::EgnitelyResponse;
+use crate::function::entities::FunctionResponse;
+
+pub struct Function {
+    pub name: String,
+    pub version: String,
+}
 
 impl Function {
-    pub fn new() -> Self {
-        Function {}
+    pub fn new(name: String, version: String) -> Self {
+        Function { name, version }
     }
 
     pub async fn zip_function(&self) -> Result<(), Box<dyn Error>> {
-        let path = Path::new("./function.zip");
+        let path = Path::new("./temp/function.zip");
         let file = File::create(&path)?;
 
         let walkdir = WalkDir::new("./");
@@ -36,7 +45,7 @@ impl Function {
             let name = path.strip_prefix(Path::new("./"))?;
 
             if path.is_file() {
-                if !(path.file_name() == Path::new("function.zip").file_name())
+                if !(path.file_name() == Path::new("./temp/function.zip").file_name())
                     && !(name.components().nth(0) == Some(Component::Normal(OsStr::new("target"))))
                 {
                     #[allow(deprecated)]
@@ -48,7 +57,8 @@ impl Function {
                     buffer.clear();
                 }
             } else if !name.as_os_str().is_empty() {
-                if !(name.components().nth(0) == Some(Component::Normal(OsStr::new("target")))) {
+                if !(name.components().nth(0) == Some(Component::Normal(OsStr::new("target"))))
+                {
                     #[allow(deprecated)]
                     zip.add_directory_from_path(name, options)?;
                 }
@@ -60,8 +70,10 @@ impl Function {
     }
 
     pub async fn upload_function(&self) -> Result<(), Box<dyn Error>> {
+        let input_schema = fs::read_to_string("./input_schema.json")?;
+        let output_schema = fs::read_to_string("./output_schema.json")?;
         let client = reqwest::blocking::Client::new();
-        let form = reqwest::blocking::multipart::Form::new().file("file", "./function.zip")?;
+        let form = reqwest::blocking::multipart::Form::new().file("file", "./temp/function.zip")?;
         if let Some(home_dir) = dirs::home_dir() {
             let db = PickleDb::load(
                 home_dir.join(".egnitely").join("credentials.db"),
@@ -70,11 +82,40 @@ impl Function {
             )?;
             let access_token = db.get::<String>("access_token");
             if let Some(access_token) = access_token {
-                let _response = client
-                    .post("http://localhost:8000/functions/0cc8f4d9-2ce9-4a7d-a3d4-17ea26b2626e/upload")
+                let get_function: EgnitelyResponse<FunctionResponse> = client
+                    .get(format!(
+                        "http://localhost:8000/functions?name={}",
+                        self.name.clone()
+                    ))
+                    .header("Authorization", format!("Bearer {}", access_token))
+                    .send()?
+                    .json()?;
+
+                let _upload_response = client
+                    .post(format!(
+                        "http://localhost:8000/functions/{}/upload",
+                        get_function.data.id
+                    ))
+                    .query(&[("version", self.version.clone())])
                     .header("Authorization", format!("Bearer {}", access_token))
                     .multipart(form)
                     .send()?;
+
+                let _update_response = client
+                    .patch(format!(
+                        "http://localhost:8000/functions/{}",
+                        get_function.data.id
+                    ))
+                    .header("Authorization", format!("Bearer {}", access_token))
+                    .json(&json! {{
+                        "name": self.name.clone(),
+                        "input_schema": input_schema,
+                        "output_schema": output_schema
+                    }})
+                    .send()?;
+
+                fs::remove_file("./temp/function.zip")?;
+                fs::remove_dir_all("./temp")?;
             } else {
                 println!("Please login before pushing the function")
             }
