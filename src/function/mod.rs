@@ -1,4 +1,5 @@
 mod entities;
+use colored::Colorize;
 use pickledb::PickleDb;
 use pickledb::PickleDbDumpPolicy;
 use pickledb::SerializationMethod;
@@ -14,6 +15,7 @@ use std::path::{Component, Path};
 use walkdir::WalkDir;
 use zip::write::FileOptions;
 
+use crate::extras::error::CLIError;
 use crate::function::entities::EgnitelyResponse;
 use crate::function::entities::FunctionResponse;
 use crate::function::entities::ServerErrorResponse;
@@ -117,7 +119,7 @@ impl Function {
                         let _update_response = client
                             .patch(format!(
                                 "http://localhost:8000/functions/{}",
-                                get_project.data.id
+                                get_function.data.id
                             ))
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
@@ -156,21 +158,51 @@ impl Function {
                                 .send()?;
                         } else {
                             println!(
-                                "CREATE_FUNCTION: Something went wrong. Status: {:?}",
-                                create_function_response.status()
+                                "{}: Unable to create function `{}`, Status: {:?}, Error: {:?}",
+                                "Error:".red().bold(),
+                                self.name,
+                                create_function_response.status(),
+                                create_function_response.json::<ServerErrorResponse>()?
                             );
-                            let _error: ServerErrorResponse = create_function_response.json()?;
+                            return Err(CLIError::new(
+                                "CREATE_FUNCTION".to_string(),
+                                format!(
+                                    "{}:  Unable to create function `{}`",
+                                    "Error:".red().bold(),
+                                    self.name,
+                                ),
+                            ));
                         }
                     }
                 } else {
                     println!(
-                        "GET_PROJECT: Something went wrong. Status: {:?}",
-                        get_project_response.status()
+                        "{}: Unable to find project `{}`, Status: {:?}, Error: {:?}",
+                        "Error:".red().bold(),
+                        project,
+                        get_project_response.status(),
+                        get_project_response.json::<ServerErrorResponse>()?
                     );
-                    let _error: ServerErrorResponse = get_project_response.json()?;
+                    return Err(CLIError::new(
+                        "BAD_PROJECT".to_string(),
+                        format!(
+                            "{}: Unable to find project `{}`",
+                            "Error:".red().bold(),
+                            project,
+                        ),
+                    ));
                 }
             } else {
-                println!("Please login before pushing the function")
+                println!(
+                    "{} Please login before pushing the function",
+                    "Error:".red().bold()
+                );
+                return Err(CLIError::new(
+                    "AUTH_ERROR".to_string(),
+                    format!(
+                        "{}: Please login before pushing the function",
+                        "Error:".red().bold(),
+                    ),
+                ));
             }
         }
 

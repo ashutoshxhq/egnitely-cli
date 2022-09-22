@@ -5,6 +5,7 @@ mod generator;
 mod handler;
 mod authn;
 mod authz;
+mod extras;
 extern crate dirs;
 use clap::{Parser, Subcommand};
 use handler:: {EgnitelyHandler, EgnitelyResource};
@@ -104,7 +105,7 @@ async fn main() {
             let _res = egnitely.trigger_function(_file.clone());
         },
         Some(Commands::Push{ project }) =>if let Some(project) = project {
-            let _res = egnitely.push_function(project.clone()).await.unwrap();
+            let _res = egnitely.push_function(project.clone()).await;
         }
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
