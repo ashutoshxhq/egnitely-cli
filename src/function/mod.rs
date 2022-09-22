@@ -3,8 +3,8 @@ use colored::Colorize;
 use pickledb::PickleDb;
 use pickledb::PickleDbDumpPolicy;
 use pickledb::SerializationMethod;
-use prettytable::Table;
 use prettytable::row;
+use prettytable::Table;
 use serde_json::json;
 use std::error::Error;
 use std::ffi::OsStr;
@@ -17,6 +17,7 @@ use std::path::{Component, Path};
 use walkdir::WalkDir;
 use zip::write::FileOptions;
 
+use crate::config::get_server_url;
 use crate::extras::error::CLIError;
 use crate::extras::response::EgnitelyResponse;
 use crate::extras::response::ServerErrorResponse;
@@ -45,7 +46,7 @@ impl Function {
             let access_token = db.get::<String>("access_token");
             if let Some(access_token) = access_token {
                 let get_functions_response = client
-                    .get("http://localhost:8000/functions")
+                    .get(format!("{}/functions", get_server_url()))
                     .header("Authorization", format!("Bearer {}", access_token))
                     .send()?;
 
@@ -61,7 +62,7 @@ impl Function {
                         table.add_row(row![function.id, function.name, function.created_at]);
                     }
                     table.printstd();
-                } else{
+                } else {
                     println!("No functions found");
                 }
             }
@@ -124,7 +125,7 @@ impl Function {
             let access_token = db.get::<String>("access_token");
             if let Some(access_token) = access_token {
                 let get_project_response = client
-                    .get(format!("http://localhost:8000/projects?name={}", project))
+                    .get(format!("{}/projects?name={}", get_server_url(), project))
                     .header("Authorization", format!("Bearer {}", access_token))
                     .send()?;
                 if get_project_response.status().is_success() {
@@ -133,7 +134,8 @@ impl Function {
 
                     let get_function_response = client
                         .get(format!(
-                            "http://localhost:8000/functions?name={}",
+                            "{}/functions?name={}",
+                            get_server_url(),
                             self.name.clone()
                         ))
                         .header("Authorization", format!("Bearer {}", access_token))
@@ -145,17 +147,22 @@ impl Function {
 
                         let _upload_response = client
                             .post(format!(
-                                "http://localhost:8000/functions/{}/upload",
+                                "{}/functions/{}/upload",
+                                get_server_url(),
                                 get_function.data.id
                             ))
-                            .query(&[("version", self.version.clone()), ("project_id", get_project.data.id.to_string())])
+                            .query(&[
+                                ("version", self.version.clone()),
+                                ("project_id", get_project.data.id.to_string()),
+                            ])
                             .header("Authorization", format!("Bearer {}", access_token))
                             .multipart(form)
                             .send()?;
 
                         let _update_response = client
                             .patch(format!(
-                                "http://localhost:8000/functions/{}",
+                                "{}/functions/{}",
+                                get_server_url(),
                                 get_function.data.id
                             ))
                             .header("Authorization", format!("Bearer {}", access_token))
@@ -170,7 +177,7 @@ impl Function {
                         fs::remove_dir_all("./temp")?;
                     } else {
                         let create_function_response = client
-                            .post("http://localhost:8000/functions")
+                            .post(format!("{}/functions", get_server_url()))
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
                                 "name": self.name.clone(),
@@ -186,7 +193,8 @@ impl Function {
                                 create_function_response.json()?;
                             let _upload_response = client
                                 .post(format!(
-                                    "http://localhost:8000/functions/{}/upload",
+                                    "{}/functions/{}/upload",
+                                    get_server_url(),
                                     create_function.data.id
                                 ))
                                 .query(&[("version", self.version.clone())])

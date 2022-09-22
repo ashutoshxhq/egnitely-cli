@@ -7,6 +7,7 @@ mod handler;
 mod project;
 mod provider;
 mod template;
+mod config;
 extern crate dirs;
 use clap::{Parser, Subcommand};
 use colored::*;
