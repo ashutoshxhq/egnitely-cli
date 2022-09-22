@@ -118,7 +118,7 @@ impl EgnitelyAuthN {
                                     } else{
                                         let mut db = PickleDb::load(
                                             home_dir.join(".egnitely").join("credentials"),
-                                            PickleDbDumpPolicy::DumpUponRequest,
+                                            PickleDbDumpPolicy::AutoDump,
                                             SerializationMethod::Json,
                                         )?;
                                         db.set("access_token", &_token_data.access_token)?;
