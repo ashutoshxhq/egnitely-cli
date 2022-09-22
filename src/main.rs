@@ -4,11 +4,12 @@ mod extras;
 mod function;
 mod generator;
 mod handler;
+mod project;
 mod provider;
 mod template;
-mod project;
 extern crate dirs;
 use clap::{Parser, Subcommand};
+use colored::*;
 use handler::{EgnitelyHandler, EgnitelyResource};
 
 #[derive(Parser)]
@@ -99,12 +100,32 @@ async fn main() {
     match &cli.command {
         Some(Commands::Create { name }) => {
             if let Some(_name) = name {
-                let _res = egnitely.create_function(_name.clone());
+                let res = egnitely.create_function(_name.clone());
+                match res {
+                    Ok(_res) => {}
+                    Err(err) => {
+                        println!(
+                            "{}: Something went wrong, Error: {:?}",
+                            "Error:".red().bold(),
+                            err
+                        );
+                    }
+                }
             }
         }
         Some(Commands::New { name }) => {
             if let Some(_name) = name {
-                let _res = egnitely.create_function(_name.clone());
+                let res = egnitely.create_function(_name.clone());
+                match res {
+                    Ok(_res) => {}
+                    Err(err) => {
+                        println!(
+                            "{}: Something went wrong, Error: {:?}",
+                            "Error:".red().bold(),
+                            err
+                        );
+                    }
+                }
             }
         }
         Some(Commands::Trigger { file }) => {
@@ -114,17 +135,47 @@ async fn main() {
         }
         Some(Commands::Push { project }) => {
             if let Some(project) = project {
-                let _res = egnitely.push_function(project.clone()).await;
+                let res = egnitely.push_function(project.clone()).await;
+                match res {
+                    Ok(_res) => {}
+                    Err(err) => {
+                        println!(
+                            "{}: Something went wrong, Error: {:?}",
+                            "Error:".red().bold(),
+                            err
+                        );
+                    }
+                }
             }
         }
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
                 match command {
                     GetCommands::Functions => {
-                        let _res = egnitely.get_resource(EgnitelyResource::Function).await.unwrap();
+                        let res = egnitely.get_resource(EgnitelyResource::Function).await;
+                        match res {
+                            Ok(_res) => {}
+                            Err(err) => {
+                                println!(
+                                    "{}: Something went wrong, Error: {:?}",
+                                    "Error:".red().bold(),
+                                    err
+                                );
+                            }
+                        }
                     }
                     GetCommands::Projects => {
-                        let _res = egnitely.get_resource(EgnitelyResource::Project).await.unwrap();
+                        let res = egnitely.get_resource(EgnitelyResource::Project).await;
+                        match res {
+                            Ok(_res) => {}
+                            Err(err) => {
+                                println!(
+                                    "{}: Something went wrong, Error: {:?}",
+                                    "Error:".red().bold(),
+                                    err
+                                );
+                            }
+                        }
                     }
                     GetCommands::Providers => {
                         let _res = egnitely.get_resource(EgnitelyResource::Provider);
@@ -165,10 +216,30 @@ async fn main() {
             }
         }
         Some(Commands::Login) => {
-            let _res = egnitely.login().await.unwrap();
+            let res = egnitely.login().await;
+            match res {
+                Ok(_res) => {}
+                Err(err) => {
+                    println!(
+                        "{}: Something went wrong, Error: {:?}",
+                        "Error:".red().bold(),
+                        err
+                    );
+                }
+            }
         }
         Some(Commands::Logout) => {
-            let _res = egnitely.logout().await;
+            let res = egnitely.logout().await;
+            match res {
+                Ok(_res) => {}
+                Err(err) => {
+                    println!(
+                        "{}: Something went wrong, Error: {:?}",
+                        "Error:".red().bold(),
+                        err
+                    );
+                }
+            }
         }
         None => {
             println!("Version: 0.1.0")

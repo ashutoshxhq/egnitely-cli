@@ -157,7 +157,7 @@ impl EgnitelyAuthN {
                 db.rem("id_token")?;
             }
         }
-        println!("Logout Triggered");
+        println!("P{} Logged Out", "Successfully".green().bold());
         Ok(())
     }
 }
