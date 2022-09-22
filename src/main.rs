@@ -1,14 +1,15 @@
-mod function;
-mod provider;
-mod template;
-mod generator;
-mod handler;
 mod authn;
 mod authz;
 mod extras;
+mod function;
+mod generator;
+mod handler;
+mod provider;
+mod template;
+mod project;
 extern crate dirs;
 use clap::{Parser, Subcommand};
-use handler:: {EgnitelyHandler, EgnitelyResource};
+use handler::{EgnitelyHandler, EgnitelyResource};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -64,6 +65,8 @@ enum Commands {
 enum GetCommands {
     /// Get list of functions
     Functions,
+    /// Get list of projects
+    Projects,
     /// Get list of providers
     Providers,
     /// Get list of templates
@@ -89,29 +92,39 @@ enum DeleteCommand {
     },
 }
 
-
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
     let egnitely = EgnitelyHandler::new();
     match &cli.command {
-        Some(Commands::Create { name }) => if let Some(_name) = name {
-            let _res = egnitely.create_function(_name.clone());
-        },
-        Some(Commands::New { name }) => if let Some(_name) = name {
-            let _res = egnitely.create_function(_name.clone());
-        },
-        Some(Commands::Trigger { file }) => if let Some(_file) = file {
-            let _res = egnitely.trigger_function(_file.clone());
-        },
-        Some(Commands::Push{ project }) =>if let Some(project) = project {
-            let _res = egnitely.push_function(project.clone()).await;
+        Some(Commands::Create { name }) => {
+            if let Some(_name) = name {
+                let _res = egnitely.create_function(_name.clone());
+            }
+        }
+        Some(Commands::New { name }) => {
+            if let Some(_name) = name {
+                let _res = egnitely.create_function(_name.clone());
+            }
+        }
+        Some(Commands::Trigger { file }) => {
+            if let Some(_file) = file {
+                let _res = egnitely.trigger_function(_file.clone());
+            }
+        }
+        Some(Commands::Push { project }) => {
+            if let Some(project) = project {
+                let _res = egnitely.push_function(project.clone()).await;
+            }
         }
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
                 match command {
                     GetCommands::Functions => {
-                        let _res = egnitely.get_resource(EgnitelyResource::Function);
+                        let _res = egnitely.get_resource(EgnitelyResource::Function).await.unwrap();
+                    }
+                    GetCommands::Projects => {
+                        let _res = egnitely.get_resource(EgnitelyResource::Project).await.unwrap();
                     }
                     GetCommands::Providers => {
                         let _res = egnitely.get_resource(EgnitelyResource::Provider);
@@ -125,25 +138,34 @@ async fn main() {
         Some(Commands::Delete { command }) => {
             if let Some(command) = command {
                 match command {
-                    DeleteCommand::Function { id } => if let Some(id) = id {
-                        let _res = egnitely.delete_resource(EgnitelyResource::Function, id.clone());
-                    },
-                    DeleteCommand::Provider { id } => if let Some(id) = id {
-                        let _res = egnitely.delete_resource(EgnitelyResource::Provider, id.clone());
-                    },
-                    DeleteCommand::Template { id } => if let Some(id) = id {
-                        let _res = egnitely.delete_resource(EgnitelyResource::AppTemplate, id.clone());
-                    },
-                    
+                    DeleteCommand::Function { id } => {
+                        if let Some(id) = id {
+                            let _res =
+                                egnitely.delete_resource(EgnitelyResource::Function, id.clone());
+                        }
+                    }
+                    DeleteCommand::Provider { id } => {
+                        if let Some(id) = id {
+                            let _res =
+                                egnitely.delete_resource(EgnitelyResource::Provider, id.clone());
+                        }
+                    }
+                    DeleteCommand::Template { id } => {
+                        if let Some(id) = id {
+                            let _res =
+                                egnitely.delete_resource(EgnitelyResource::AppTemplate, id.clone());
+                        }
+                    }
                 }
             }
         }
-        Some(Commands::Apply { file }) => if let Some(_file) = file {
-            let _res = egnitely.apply_template(_file.clone());
-        },
+        Some(Commands::Apply { file }) => {
+            if let Some(_file) = file {
+                let _res = egnitely.apply_template(_file.clone());
+            }
+        }
         Some(Commands::Login) => {
             let _res = egnitely.login().await.unwrap();
-            
         }
         Some(Commands::Logout) => {
             let _res = egnitely.logout().await;
@@ -152,5 +174,4 @@ async fn main() {
             println!("Version: 0.1.0")
         }
     }
-    
 }

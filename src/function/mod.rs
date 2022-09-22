@@ -1,8 +1,10 @@
-mod entities;
+pub mod entities;
 use colored::Colorize;
 use pickledb::PickleDb;
 use pickledb::PickleDbDumpPolicy;
 use pickledb::SerializationMethod;
+use prettytable::Table;
+use prettytable::row;
 use serde_json::json;
 use std::error::Error;
 use std::ffi::OsStr;
@@ -16,9 +18,9 @@ use walkdir::WalkDir;
 use zip::write::FileOptions;
 
 use crate::extras::error::CLIError;
-use crate::function::entities::EgnitelyResponse;
+use crate::extras::response::EgnitelyResponse;
+use crate::extras::response::ServerErrorResponse;
 use crate::function::entities::FunctionResponse;
-use crate::function::entities::ServerErrorResponse;
 
 use self::entities::ProjectResponse;
 
@@ -30,6 +32,41 @@ pub struct Function {
 impl Function {
     pub fn new(name: String, version: String) -> Self {
         Function { name, version }
+    }
+
+    pub async fn get_functions(&self) -> Result<(), Box<dyn Error>> {
+        let client = reqwest::blocking::Client::new();
+        if let Some(home_dir) = dirs::home_dir() {
+            let db = PickleDb::load(
+                home_dir.join(".egnitely").join("credentials"),
+                PickleDbDumpPolicy::DumpUponRequest,
+                SerializationMethod::Json,
+            )?;
+            let access_token = db.get::<String>("access_token");
+            if let Some(access_token) = access_token {
+                let get_functions_response = client
+                    .get("http://localhost:8000/functions")
+                    .header("Authorization", format!("Bearer {}", access_token))
+                    .send()?;
+
+                if get_functions_response.status().is_success() {
+                    let get_functions: EgnitelyResponse<Vec<FunctionResponse>> =
+                        get_functions_response.json()?;
+
+                    let mut table = Table::new();
+
+                    // Add a row per time
+                    table.add_row(row!["ID", "NAME", "CREATED AT"]);
+                    for function in get_functions.data {
+                        table.add_row(row![function.id, function.name, function.created_at]);
+                    }
+                    table.printstd();
+                } else{
+                    println!("No functions found");
+                }
+            }
+        }
+        Ok(())
     }
 
     pub async fn zip_function(&self) -> Result<(), Box<dyn Error>> {

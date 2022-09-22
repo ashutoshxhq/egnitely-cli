@@ -1,3 +1,4 @@
+use crate::project::Project;
 use crate::{authn::EgnitelyAuthN, function::Function, generator::EgnitelyGenerator};
 use colored::*;
 use indicatif::{ProgressBar, ProgressStyle};
@@ -5,9 +6,10 @@ use serde::Deserialize;
 use std::fs;
 use std::{error::Error, time::Duration};
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum EgnitelyResource {
     Function,
+    Project,
     Provider,
     AppTemplate,
 }
@@ -122,8 +124,17 @@ impl EgnitelyHandler {
         Ok(())
     }
 
-    pub fn get_resource(&self, resource_name: EgnitelyResource) -> Result<(), Box<dyn Error>> {
-        println!("Create function named: {:?}", resource_name);
+    pub async fn get_resource(
+        &self,
+        resource_name: EgnitelyResource,
+    ) -> Result<(), Box<dyn Error>> {
+        if resource_name == EgnitelyResource::Function {
+            let function = Function::new("".to_string(), "".to_string());
+            function.get_functions().await?;
+        } else if resource_name == EgnitelyResource::Project {
+            let project = Project::new("".to_string());
+            project.get_projects().await?;
+        }
         Ok(())
     }
 
