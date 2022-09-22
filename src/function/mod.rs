@@ -159,6 +159,17 @@ impl Function {
                             .multipart(form)
                             .send()?;
 
+                        if !_upload_response.status().is_success() {
+                            return Err(CLIError::new(
+                                "UPLOAD_ERROR".to_string(),
+                                format!(
+                                    "{}: Unable to upload a function, Error: {:?}",
+                                    "Error:".red().bold(),
+                                    _upload_response.text()?
+                                ),
+                            ));
+                        }
+
                         let _update_response = client
                             .patch(format!(
                                 "{}/functions/{}",
@@ -172,6 +183,17 @@ impl Function {
                                 "output_schema": output_schema
                             }})
                             .send()?;
+
+                        if !_update_response.status().is_success() {
+                            return Err(CLIError::new(
+                                "UPDATE_FUNCTION_ERROR".to_string(),
+                                format!(
+                                    "{}: Unable to upload a function, Error: {:?}",
+                                    "Error:".red().bold(),
+                                    _update_response.text()?
+                                ),
+                            ));
+                        }
 
                         fs::remove_file("./temp/function.zip")?;
                         fs::remove_dir_all("./temp")?;
@@ -201,6 +223,17 @@ impl Function {
                                 .header("Authorization", format!("Bearer {}", access_token))
                                 .multipart(form)
                                 .send()?;
+
+                            if !_upload_response.status().is_success() {
+                                return Err(CLIError::new(
+                                    "UPLOAD_ERROR".to_string(),
+                                    format!(
+                                        "{}: Unable to upload a function, Error: {:?}",
+                                        "Error:".red().bold(),
+                                        _upload_response.text()?
+                                    ),
+                                ));
+                            }
                         } else {
                             println!(
                                 "{}: Unable to create function `{}`, Status: {:?}, Error: {:?}",
