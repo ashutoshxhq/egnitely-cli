@@ -1,7 +1,7 @@
 use std::error::Error;
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use prettytable::{Table, row};
-use crate::extras::response::EgnitelyResponse;
+use crate::{extras::response::EgnitelyResponse, config::get_server_url};
 use self::entities::ProjectResponse;
 pub mod entities;
 
@@ -25,7 +25,7 @@ impl Project {
             let access_token = db.get::<String>("access_token");
             if let Some(access_token) = access_token {
                 let get_functions_response = client
-                    .get("http://localhost:8000/projects")
+                    .get(format!("{}/projects", get_server_url()))
                     .header("Authorization", format!("Bearer {}", access_token))
                     .send()?;
 
