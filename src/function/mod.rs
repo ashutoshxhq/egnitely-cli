@@ -36,6 +36,7 @@ impl Function {
     }
 
     pub async fn get_functions(&self) -> Result<(), Box<dyn Error>> {
+        println!("");
         let client = reqwest::blocking::Client::new();
         if let Some(home_dir) = dirs::home_dir() {
             let db = PickleDb::load(
@@ -67,6 +68,7 @@ impl Function {
                 }
             }
         }
+        println!("");
         Ok(())
     }
 
