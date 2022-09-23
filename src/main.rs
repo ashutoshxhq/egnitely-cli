@@ -37,11 +37,6 @@ enum Commands {
         #[clap(value_parser)]
         name: Option<String>,
     },
-    /// Trigger Egnitely Function with test data
-    Trigger {
-        #[clap(value_parser)]
-        file: Option<String>,
-    },
     /// Apply a function template to a cloud environment
     Apply {
         #[clap(value_parser)]
@@ -51,11 +46,6 @@ enum Commands {
     Get {
         #[clap(subcommand)]
         command: Option<GetCommands>,
-    },
-    /// Delete a function, template or provider
-    Delete {
-        #[clap(subcommand)]
-        command: Option<DeleteCommand>,
     },
     /// Login to your Egnitely Account
     Login,
@@ -75,24 +65,6 @@ enum GetCommands {
     Templates,
 }
 
-#[derive(Subcommand)]
-enum DeleteCommand {
-    /// Delete a function with the given id
-    Function {
-        #[clap(value_parser)]
-        id: Option<String>,
-    },
-    /// Delete a provider with the given id
-    Provider {
-        #[clap(value_parser)]
-        id: Option<String>,
-    },
-    /// Delete a template with the given id
-    Template {
-        #[clap(value_parser)]
-        id: Option<String>,
-    },
-}
 
 #[tokio::main]
 async fn main() {
@@ -127,11 +99,6 @@ async fn main() {
                         );
                     }
                 }
-            }
-        }
-        Some(Commands::Trigger { file }) => {
-            if let Some(_file) = file {
-                let _res = egnitely.trigger_function(_file.clone());
             }
         }
         Some(Commands::Push { project }) => {
@@ -183,30 +150,6 @@ async fn main() {
                     }
                     GetCommands::Templates => {
                         let _res = egnitely.get_resource(EgnitelyResource::AppTemplate);
-                    }
-                }
-            }
-        }
-        Some(Commands::Delete { command }) => {
-            if let Some(command) = command {
-                match command {
-                    DeleteCommand::Function { id } => {
-                        if let Some(id) = id {
-                            let _res =
-                                egnitely.delete_resource(EgnitelyResource::Function, id.clone());
-                        }
-                    }
-                    DeleteCommand::Provider { id } => {
-                        if let Some(id) = id {
-                            let _res =
-                                egnitely.delete_resource(EgnitelyResource::Provider, id.clone());
-                        }
-                    }
-                    DeleteCommand::Template { id } => {
-                        if let Some(id) = id {
-                            let _res =
-                                egnitely.delete_resource(EgnitelyResource::AppTemplate, id.clone());
-                        }
                     }
                 }
             }

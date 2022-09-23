@@ -44,11 +44,6 @@ impl EgnitelyHandler {
         Ok(())
     }
 
-    pub fn trigger_function(&self, file: String) -> Result<(), Box<dyn Error>> {
-        println!("Trigger function with json: {}", file);
-        Ok(())
-    }
-
     pub async fn push_function(&self, project: String) -> Result<(), Box<dyn Error>> {
         let contents = fs::read_to_string("Cargo.toml")?;
         let data: CargoTomlSchema = toml::from_str(&contents)?;
@@ -135,15 +130,6 @@ impl EgnitelyHandler {
             let project = Project::new("".to_string());
             project.get_projects().await?;
         }
-        Ok(())
-    }
-
-    pub fn delete_resource(
-        &self,
-        resource_name: EgnitelyResource,
-        _id: String,
-    ) -> Result<(), Box<dyn Error>> {
-        println!("Create function named: {:?}", resource_name);
         Ok(())
     }
 }
