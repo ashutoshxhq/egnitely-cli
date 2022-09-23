@@ -5,6 +5,7 @@ use pickledb::PickleDbDumpPolicy;
 use pickledb::SerializationMethod;
 use prettytable::row;
 use prettytable::Table;
+use semver::Version;
 use serde_json::json;
 use std::error::Error;
 use std::ffi::OsStr;
@@ -150,6 +151,16 @@ impl Function {
                     if get_function_response.status().is_success() {
                         let get_function: EgnitelyResponse<FunctionResponse> =
                             get_function_response.json()?;
+                        if let Some(latest_version) = get_function.data.latest_version {
+                            let current_version = Version::parse(&self.version.clone())?;
+                            let latest_version = Version::parse(&latest_version)?;
+                            if current_version.le(&latest_version) {
+                                return Err(CLIError::new(
+                                    "VERSION_ERROR".to_string(),
+                                    format!("Function's version is less than or equal to last deployed version, please bump up the version before pushing it"),
+                                ));
+                            }
+                        }
 
                         let _upload_response = client
                             .post(format!(
@@ -185,6 +196,7 @@ impl Function {
                             .json(&json! {{
                                 "name": self.name.clone(),
                                 "description": self.description.clone(),
+                                "latest_version": self.version.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema
                             }})
@@ -209,6 +221,7 @@ impl Function {
                             .json(&json! {{
                                 "name": self.name.clone(),
                                 "description": self.description.clone(),
+                                "latest_version": self.version.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema,
                                 "project_id": get_project.data.id,
@@ -226,7 +239,7 @@ impl Function {
                                     create_function.data.id
                                 ))
                                 .query(&[
-                                    ("latest_version", self.version.clone()),
+                                    ("version", self.version.clone()),
                                     ("project_id", get_project.data.id.to_string()),
                                 ])
                                 .header("Authorization", format!("Bearer {}", access_token))

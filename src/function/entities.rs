@@ -9,6 +9,7 @@ pub struct FunctionResponse {
     pub name: String,
     pub description: Option<String>,
     pub language: Option<String>,
+    pub latest_version: Option<String>,
     pub repository_url: Option<String>,
     pub branch: Option<String>,
     pub sub_directory: Option<String>,
