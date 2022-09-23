@@ -226,7 +226,7 @@ impl Function {
                                     create_function.data.id
                                 ))
                                 .query(&[
-                                    ("version", self.version.clone()),
+                                    ("latest_version", self.version.clone()),
                                     ("project_id", get_project.data.id.to_string()),
                                 ])
                                 .header("Authorization", format!("Bearer {}", access_token))
