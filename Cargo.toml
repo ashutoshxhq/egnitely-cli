@@ -1,6 +1,6 @@
 [package]
 name = "egnite"
-version = "0.1.4"
+version = "0.1.5"
 description = "Egnite is a CLI tool for developing, publishing and managing Egnitely Functions"
 edition = "2021"
 license = "MIT OR Apache-2.0"
