@@ -373,7 +373,7 @@ dependencies = [
 
 [[package]]
 name = "egnite"
-version = "0.1.3"
+version = "0.1.4"
 dependencies = [
  "chrono",
  "clap",
