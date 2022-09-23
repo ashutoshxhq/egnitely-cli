@@ -79,7 +79,7 @@ async fn main() {
                     Err(err) => {
                         println!(
                             "{}",
-                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            format!("Error: {}", err).red().bold()
                             
                         );
                     }
@@ -94,7 +94,7 @@ async fn main() {
                     Err(err) => {
                         println!(
                             "{}",
-                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            format!("Error: {}", err).red().bold()
                             
                         );
                     }
@@ -109,7 +109,7 @@ async fn main() {
                     Err(err) => {
                         println!(
                             "{}",
-                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            format!("Error: {}", err).red().bold()
                             
                         );
                     }
@@ -126,7 +126,7 @@ async fn main() {
                             Err(err) => {
                                 println!(
                                     "{}",
-                                    format!("{}: {}", "Error:".red().bold(), err).red()
+                                    format!("Error: {}", err).red().bold()
                                     
                                 );
                             }
@@ -139,7 +139,7 @@ async fn main() {
                             Err(err) => {
                                 println!(
                                     "{}",
-                                    format!("{}: {}", "Error:".red().bold(), err).red()
+                                    format!("Error: {}", err).red().bold()
                                     
                                 );
                             }
@@ -166,7 +166,7 @@ async fn main() {
                 Err(err) => {
                     println!(
                         "{}",
-                        format!("{}: {}", "Error:".red().bold(), err).red()
+                        format!("{}: {}", "Error", err)
                         
                     );
                 }
@@ -179,7 +179,7 @@ async fn main() {
                 Err(err) => {
                     println!(
                         "{}",
-                        format!("{}: {}", "Error:".red().bold(), err).red()
+                        format!("Error: {}", err).red().bold()
                         
                     );
                 }

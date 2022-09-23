@@ -43,7 +43,7 @@ impl Project {
                     }
                     table.printstd();
                 } else{
-                    println!("No projects found");
+                    println!("No projects found, please check if you are logged in");
                 }
             }
         }

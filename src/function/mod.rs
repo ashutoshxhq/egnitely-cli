@@ -32,7 +32,11 @@ pub struct Function {
 
 impl Function {
     pub fn new(name: String, version: String, description: String) -> Self {
-        Function { name, version, description }
+        Function {
+            name,
+            version,
+            description,
+        }
     }
 
     pub async fn get_functions(&self) -> Result<(), Box<dyn Error>> {
@@ -64,7 +68,7 @@ impl Function {
                     }
                     table.printstd();
                 } else {
-                    println!("No functions found");
+                    println!("No functions found, please check if you are logged in");
                 }
             }
         }
@@ -165,8 +169,7 @@ impl Function {
                             return Err(CLIError::new(
                                 "UPLOAD_ERROR".to_string(),
                                 format!(
-                                    "{}: Unable to upload a function, Error: {:?}",
-                                    "Error:".red().bold(),
+                                    "Unable to upload a function, Error: {:?}",
                                     _upload_response.text()?
                                 ),
                             ));
@@ -191,8 +194,7 @@ impl Function {
                             return Err(CLIError::new(
                                 "UPDATE_FUNCTION_ERROR".to_string(),
                                 format!(
-                                    "{}: Unable to upload a function, Error: {:?}",
-                                    "Error:".red().bold(),
+                                    "Unable to upload a function, Error: {:?}",
                                     _update_response.text()?
                                 ),
                             ));
@@ -235,44 +237,31 @@ impl Function {
                                 return Err(CLIError::new(
                                     "UPLOAD_ERROR".to_string(),
                                     format!(
-                                        "{}: Unable to upload a function, Error: {:?}",
-                                        "Error:".red().bold(),
+                                        "Unable to upload a function, Error: {:?}",
                                         _upload_response.text()?
                                     ),
                                 ));
                             }
                         } else {
-                            println!(
-                                "{}: Unable to create function `{}`, Status: {:?}, Error: {:?}",
-                                "Error:".red().bold(),
-                                self.name,
-                                create_function_response.status(),
-                                create_function_response.text()?
-                            );
                             return Err(CLIError::new(
-                                "CREATE_FUNCTION".to_string(),
+                                "CREATE_FUNCTION_ERROR".to_string(),
                                 format!(
-                                    "{}:  Unable to create function `{}`",
-                                    "Error:".red().bold(),
+                                    "Unable to create function `{}`, Status: {:?}, Error: {:?}",
                                     self.name,
+                                    create_function_response.status(),
+                                    create_function_response.text()?
                                 ),
                             ));
                         }
                     }
                 } else {
-                    println!(
-                        "{}: Unable to find project `{}`, Status: {:?}, Error: {:?}",
-                        "Error:".red().bold(),
-                        project,
-                        get_project_response.status(),
-                        get_project_response.text()?
-                    );
                     return Err(CLIError::new(
-                        "BAD_PROJECT".to_string(),
+                        "BAD_PROJECT_NAME".to_string(),
                         format!(
-                            "{}: Unable to find project `{}`",
-                            "Error:".red().bold(),
+                            "Unable to find project `{}`, Status: {:?}, Error: {:?}",
                             project,
+                            get_project_response.status(),
+                            get_project_response.text()?
                         ),
                     ));
                 }
@@ -283,10 +272,7 @@ impl Function {
                 );
                 return Err(CLIError::new(
                     "AUTH_ERROR".to_string(),
-                    format!(
-                        "{}: Please login before pushing the function",
-                        "Error:".red().bold(),
-                    ),
+                    format!("Please login before pushing the function"),
                 ));
             }
         }
