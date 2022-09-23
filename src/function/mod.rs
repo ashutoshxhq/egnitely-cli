@@ -20,7 +20,6 @@ use zip::write::FileOptions;
 use crate::config::get_server_url;
 use crate::extras::error::CLIError;
 use crate::extras::response::EgnitelyResponse;
-use crate::extras::response::ServerErrorResponse;
 use crate::function::entities::FunctionResponse;
 
 use self::entities::ProjectResponse;
@@ -248,7 +247,7 @@ impl Function {
                                 "Error:".red().bold(),
                                 self.name,
                                 create_function_response.status(),
-                                create_function_response.json::<ServerErrorResponse>()?
+                                create_function_response.text()?
                             );
                             return Err(CLIError::new(
                                 "CREATE_FUNCTION".to_string(),
@@ -266,7 +265,7 @@ impl Function {
                         "Error:".red().bold(),
                         project,
                         get_project_response.status(),
-                        get_project_response.json::<ServerErrorResponse>()?
+                        get_project_response.text()?
                     );
                     return Err(CLIError::new(
                         "BAD_PROJECT".to_string(),

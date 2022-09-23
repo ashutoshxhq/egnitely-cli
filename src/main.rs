@@ -78,9 +78,9 @@ async fn main() {
                     Ok(_res) => {}
                     Err(err) => {
                         println!(
-                            "{}: Something went wrong, Error: {:?}",
-                            "Error:".red().bold(),
-                            err
+                            "{}",
+                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            
                         );
                     }
                 }
@@ -93,9 +93,9 @@ async fn main() {
                     Ok(_res) => {}
                     Err(err) => {
                         println!(
-                            "{}: Something went wrong, Error: {:?}",
-                            "Error:".red().bold(),
-                            err
+                            "{}",
+                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            
                         );
                     }
                 }
@@ -108,9 +108,9 @@ async fn main() {
                     Ok(_res) => {}
                     Err(err) => {
                         println!(
-                            "{}: Something went wrong, Error: {:?}",
-                            "Error:".red().bold(),
-                            err
+                            "{}",
+                            format!("{}: {}", "Error:".red().bold(), err).red()
+                            
                         );
                     }
                 }
@@ -125,9 +125,9 @@ async fn main() {
                             Ok(_res) => {}
                             Err(err) => {
                                 println!(
-                                    "{}: Something went wrong, Error: {:?}",
-                                    "Error:".red().bold(),
-                                    err
+                                    "{}",
+                                    format!("{}: {}", "Error:".red().bold(), err).red()
+                                    
                                 );
                             }
                         }
@@ -138,9 +138,9 @@ async fn main() {
                             Ok(_res) => {}
                             Err(err) => {
                                 println!(
-                                    "{}: Something went wrong, Error: {:?}",
-                                    "Error:".red().bold(),
-                                    err
+                                    "{}",
+                                    format!("{}: {}", "Error:".red().bold(), err).red()
+                                    
                                 );
                             }
                         }
@@ -165,9 +165,9 @@ async fn main() {
                 Ok(_res) => {}
                 Err(err) => {
                     println!(
-                        "{}: Something went wrong, Error: {:?}",
-                        "Error:".red().bold(),
-                        err
+                        "{}",
+                        format!("{}: {}", "Error:".red().bold(), err).red()
+                        
                     );
                 }
             }
@@ -178,9 +178,9 @@ async fn main() {
                 Ok(_res) => {}
                 Err(err) => {
                     println!(
-                        "{}: Something went wrong, Error: {:?}",
-                        "Error:".red().bold(),
-                        err
+                        "{}",
+                        format!("{}: {}", "Error:".red().bold(), err).red()
+                        
                     );
                 }
             }
