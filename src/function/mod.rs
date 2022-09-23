@@ -219,7 +219,10 @@ impl Function {
                                     get_server_url(),
                                     create_function.data.id
                                 ))
-                                .query(&[("version", self.version.clone())])
+                                .query(&[
+                                    ("version", self.version.clone()),
+                                    ("project_id", get_project.data.id.to_string()),
+                                ])
                                 .header("Authorization", format!("Bearer {}", access_token))
                                 .multipart(form)
                                 .send()?;
