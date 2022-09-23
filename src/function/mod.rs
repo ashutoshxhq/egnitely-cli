@@ -28,11 +28,12 @@ use self::entities::ProjectResponse;
 pub struct Function {
     pub name: String,
     pub version: String,
+    pub description: String,
 }
 
 impl Function {
-    pub fn new(name: String, version: String) -> Self {
-        Function { name, version }
+    pub fn new(name: String, version: String, description: String) -> Self {
+        Function { name, version, description }
     }
 
     pub async fn get_functions(&self) -> Result<(), Box<dyn Error>> {
@@ -181,6 +182,7 @@ impl Function {
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
                                 "name": self.name.clone(),
+                                "description": self.description.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema
                             }})
@@ -205,6 +207,7 @@ impl Function {
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
                                 "name": self.name.clone(),
+                                "description": self.description.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema,
                                 "project_id": get_project.data.id,
