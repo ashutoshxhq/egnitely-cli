@@ -186,7 +186,7 @@ async fn main() {
             }
         }
         None => {
-            println!("Version: 0.1.0")
+            println!("Please type `egnite --help` to see list of commands")
         }
     }
 }
