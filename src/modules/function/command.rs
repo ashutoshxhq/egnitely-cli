@@ -57,13 +57,16 @@ pub async fn push_function() -> Result<(), Box<dyn Error>> {
             );
             pb.set_message("Uploading");
 
-            let function = FunctionService::new(
-                data.package.name.clone(),
-                data.package.version.clone(),
-                description,
-            );
+            let function = FunctionService::new();
             function.zip_function().await?;
-            function.upload_function(project).await?;
+            function
+                .push_function(
+                    data.package.name.clone(),
+                    data.package.version.clone(),
+                    description,
+                    project,
+                )
+                .await?;
 
             pb.finish_and_clear();
             println!(
@@ -100,8 +103,8 @@ pub fn create_function(name: String) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub async fn get_function() -> Result<(), Box<dyn Error>> {
-    let function = FunctionService::new("".to_string(), "".to_string(), "".to_string());
-    function.get_functions().await?;
+pub async fn get_function(project: String) -> Result<(), Box<dyn Error>> {
+    let function = FunctionService::new();
+    function.get_functions(project).await?;
     Ok(())
 }

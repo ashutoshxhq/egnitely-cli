@@ -3,13 +3,11 @@ use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use prettytable::{Table, row};
 use crate::{extras::response::EgnitelyResponse, config::get_server_url, modules::project::entities::ProjectResponse};
 
-pub struct ProjectService {
-    pub name: String,
-}
+pub struct ProjectService {}
 
 impl ProjectService {
-    pub fn new(name: String) -> Self {
-        ProjectService { name }
+    pub fn new() -> Self {
+        ProjectService {}
     }
 
     pub async fn get_projects(&self) -> Result<(), Box<dyn Error>> {

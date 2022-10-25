@@ -5,7 +5,7 @@ mod modules;
 extern crate dirs;
 use clap::{Parser, Subcommand};
 use colored::*;
-use modules::{function, project, authn, global};
+use modules::{authn, function, global, project};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -42,11 +42,17 @@ enum Commands {
 #[derive(Subcommand)]
 enum GetCommands {
     /// Get list of functions
-    Functions,
+    Functions {
+        #[clap(short, long)]
+        project: Option<String>,
+    },
     /// Get list of projects
     Projects,
     /// Get list of providers
-    Applications,
+    Applications {
+        #[clap(short, long)]
+        project: Option<String>,
+    },
 }
 
 #[derive(Subcommand)]
@@ -91,13 +97,17 @@ async fn main() {
         Some(Commands::Get { command }) => {
             if let Some(command) = command {
                 match command {
-                    GetCommands::Functions => {
-                        let res = function::command::get_function().await;
-                        match res {
-                            Ok(_res) => {}
-                            Err(err) => {
-                                println!("{}", format!("Error: {}", err).red().bold());
+                    GetCommands::Functions { project } => {
+                        if let Some(project) = project {
+                            let res = function::command::get_function(project.to_string()).await;
+                            match res {
+                                Ok(_res) => {}
+                                Err(err) => {
+                                    println!("{}", format!("Error: {}", err).red().bold());
+                                }
                             }
+                        } else{
+                            println!("{}: Plese provide a project name using the -p flag", "Error".red().bold())
                         }
                     }
                     GetCommands::Projects => {
@@ -109,8 +119,10 @@ async fn main() {
                             }
                         }
                     }
-                    GetCommands::Applications => {
-                        // let _res = egnitely.get_resource(EgnitelyResource::Application);
+                    GetCommands::Applications { project } => {
+                        if let Some(_project) = project {
+                            // let _res = egnitely.get_resource(EgnitelyResource::Application);
+                        }
                     }
                 }
             }

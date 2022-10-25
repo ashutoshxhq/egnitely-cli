@@ -24,22 +24,14 @@ use crate::modules::function::entities::FunctionResponse;
 
 use super::entities::ProjectResponse;
 
-pub struct FunctionService {
-    pub name: String,
-    pub version: String,
-    pub description: String,
-}
+pub struct FunctionService {}
 
 impl FunctionService {
-    pub fn new(name: String, version: String, description: String) -> Self {
-        FunctionService {
-            name,
-            version,
-            description,
-        }
+    pub fn new() -> Self {
+        FunctionService {}
     }
 
-    pub async fn get_functions(&self) -> Result<(), Box<dyn Error>> {
+    pub async fn get_functions(&self, project: String) -> Result<(), Box<dyn Error>> {
         println!("");
         let client = reqwest::blocking::Client::new();
         if let Some(home_dir) = dirs::home_dir() {
@@ -50,25 +42,47 @@ impl FunctionService {
             )?;
             let access_token = db.get::<String>("access_token");
             if let Some(access_token) = access_token {
-                let get_functions_response = client
-                    .get(format!("{}/functions", get_server_url()))
+                let get_project_response = client
+                    .get(format!("{}/projects?name={}", get_server_url(), project))
                     .header("Authorization", format!("Bearer {}", access_token))
                     .send()?;
+                if get_project_response.status().is_success() {
+                    let get_project: EgnitelyResponse<ProjectResponse> =
+                        get_project_response.json()?;
 
-                if get_functions_response.status().is_success() {
-                    let get_functions: EgnitelyResponse<Vec<FunctionResponse>> =
-                        get_functions_response.json()?;
+                    let get_functions_response = client
+                        .get(format!(
+                            "{}/functions?project_id={}",
+                            get_server_url(),
+                            get_project.data.id.to_string()
+                        ))
+                        .header("Authorization", format!("Bearer {}", access_token))
+                        .send()?;
+                    if get_functions_response.status().is_success() {
+                        let get_functions: EgnitelyResponse<Vec<FunctionResponse>> =
+                            get_functions_response.json()?;
 
-                    let mut table = Table::new();
+                        let mut table = Table::new();
 
-                    // Add a row per time
-                    table.add_row(row!["ID", "NAME", "CREATED AT"]);
-                    for function in get_functions.data {
-                        table.add_row(row![function.id, function.name, function.created_at]);
+                        // Add a row per time
+                        table.add_row(row!["ID", "NAME", "CREATED AT"]);
+                        for function in get_functions.data {
+                            table.add_row(row![function.id, function.name, function.created_at]);
+                        }
+                        table.printstd();
+                    } else {
+                        println!("No functions found, please check if you are logged in");
                     }
-                    table.printstd();
                 } else {
-                    println!("No functions found, please check if you are logged in");
+                    return Err(CLIError::new(
+                        "BAD_PROJECT_NAME".to_string(),
+                        format!(
+                            "Unable to find project `{}`, Status: {:?}, Error: {:?}",
+                            project,
+                            get_project_response.status(),
+                            get_project_response.text()?
+                        ),
+                    ));
                 }
             }
         }
@@ -117,7 +131,13 @@ impl FunctionService {
         Ok(())
     }
 
-    pub async fn upload_function(&self, project: String) -> Result<(), Box<dyn Error>> {
+    pub async fn push_function(
+        &self,
+        name: String,
+        version: String,
+        description: String,
+        project: String,
+    ) -> Result<(), Box<dyn Error>> {
         let input_schema = fs::read_to_string("./input_schema.json")?;
         let output_schema = fs::read_to_string("./output_schema.json")?;
         let client = reqwest::blocking::Client::new();
@@ -142,7 +162,7 @@ impl FunctionService {
                         .get(format!(
                             "{}/functions?name={}",
                             get_server_url(),
-                            self.name.clone()
+                            name.clone()
                         ))
                         .header("Authorization", format!("Bearer {}", access_token))
                         .send()?;
@@ -151,7 +171,7 @@ impl FunctionService {
                         let get_function: EgnitelyResponse<FunctionResponse> =
                             get_function_response.json()?;
                         if let Some(latest_version) = get_function.data.latest_version {
-                            let current_version = Version::parse(&self.version.clone())?;
+                            let current_version = Version::parse(&version.clone())?;
                             let latest_version = Version::parse(&latest_version)?;
                             if current_version.le(&latest_version) {
                                 return Err(CLIError::new(
@@ -168,7 +188,7 @@ impl FunctionService {
                                 get_function.data.id
                             ))
                             .query(&[
-                                ("version", self.version.clone()),
+                                ("version", version.clone()),
                                 ("project_id", get_project.data.id.to_string()),
                             ])
                             .header("Authorization", format!("Bearer {}", access_token))
@@ -193,9 +213,9 @@ impl FunctionService {
                             ))
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
-                                "name": self.name.clone(),
-                                "description": self.description.clone(),
-                                "latest_version": self.version.clone(),
+                                "name": name.clone(),
+                                "description": description.clone(),
+                                "latest_version": version.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema
                             }})
@@ -218,9 +238,9 @@ impl FunctionService {
                             .post(format!("{}/functions", get_server_url()))
                             .header("Authorization", format!("Bearer {}", access_token))
                             .json(&json! {{
-                                "name": self.name.clone(),
-                                "description": self.description.clone(),
-                                "latest_version": self.version.clone(),
+                                "name": name.clone(),
+                                "description": description.clone(),
+                                "latest_version": version.clone(),
                                 "input_schema": input_schema,
                                 "output_schema": output_schema,
                                 "project_id": get_project.data.id,
@@ -238,7 +258,7 @@ impl FunctionService {
                                     create_function.data.id
                                 ))
                                 .query(&[
-                                    ("version", self.version.clone()),
+                                    ("version", version.clone()),
                                     ("project_id", get_project.data.id.to_string()),
                                 ])
                                 .header("Authorization", format!("Bearer {}", access_token))
@@ -259,7 +279,7 @@ impl FunctionService {
                                 "CREATE_FUNCTION_ERROR".to_string(),
                                 format!(
                                     "Unable to create function `{}`, Status: {:?}, Error: {:?}",
-                                    self.name,
+                                    name,
                                     create_function_response.status(),
                                     create_function_response.text()?
                                 ),
