@@ -138,8 +138,6 @@ impl FunctionService {
         description: String,
         project: String,
     ) -> Result<(), Box<dyn Error>> {
-        let input_schema = fs::read_to_string("./input_schema.json")?;
-        let output_schema = fs::read_to_string("./output_schema.json")?;
         let client = reqwest::blocking::Client::new();
         let form = reqwest::blocking::multipart::Form::new().file("file", "./temp/function.zip")?;
         if let Some(home_dir) = dirs::home_dir() {
@@ -216,8 +214,8 @@ impl FunctionService {
                                 "name": name.clone(),
                                 "description": description.clone(),
                                 "latest_version": version.clone(),
-                                "input_schema": input_schema,
-                                "output_schema": output_schema
+                                "input_schema": json!({}),
+                                "output_schema": json!({})
                             }})
                             .send()?;
 
@@ -241,8 +239,8 @@ impl FunctionService {
                                 "name": name.clone(),
                                 "description": description.clone(),
                                 "latest_version": version.clone(),
-                                "input_schema": input_schema,
-                                "output_schema": output_schema,
+                                "input_schema": json!({}),
+                                "output_schema": json!({}),
                                 "project_id": get_project.data.id,
                                 "team_id": get_project.data.team_id,
                             }})

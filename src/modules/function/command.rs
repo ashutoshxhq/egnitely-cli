@@ -44,10 +44,6 @@ pub async fn push_function() -> Result<(), Box<dyn Error>> {
                         "▰▱▱▱▱▱▱▱▱▱▱▱▱▱▱",
                     ]),
             );
-            pb.set_message("Compiling");
-
-            let generator = EgnitelyGenerator::new(data.package.name.clone(), "rust".to_string());
-            generator.generate_application()?;
 
             println!(
                 "{} {} {} to Egnitely",
