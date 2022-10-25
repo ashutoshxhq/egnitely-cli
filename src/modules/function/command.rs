@@ -1,4 +1,4 @@
-use crate::extras::error::CLIError;
+use crate::utils::error::CLIError;
 use crate::modules::function::entities::CargoTomlSchema;
 use crate::modules::function::generator::EgnitelyGenerator;
 use crate::modules::function::service::FunctionService;

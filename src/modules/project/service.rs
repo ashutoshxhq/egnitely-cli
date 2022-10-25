@@ -1,7 +1,7 @@
 use std::error::Error;
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use prettytable::{Table, row};
-use crate::{extras::response::EgnitelyResponse, config::get_server_url, modules::project::entities::ProjectResponse};
+use crate::{utils::response::EgnitelyResponse, config::get_server_url, modules::project::entities::ProjectResponse};
 
 pub struct ProjectService {}
 

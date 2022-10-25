@@ -18,8 +18,8 @@ use walkdir::WalkDir;
 use zip::write::FileOptions;
 
 use crate::config::get_server_url;
-use crate::extras::error::CLIError;
-use crate::extras::response::EgnitelyResponse;
+use crate::utils::error::CLIError;
+use crate::utils::response::EgnitelyResponse;
 use crate::modules::function::entities::FunctionResponse;
 
 use super::entities::ProjectResponse;

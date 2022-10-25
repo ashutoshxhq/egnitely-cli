@@ -1,6 +1,6 @@
 mod authz;
 mod config;
-mod extras;
+mod utils;
 mod modules;
 extern crate dirs;
 use clap::{Parser, Subcommand};
