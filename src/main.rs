@@ -1,17 +1,11 @@
-mod authn;
 mod authz;
-mod extras;
-mod function;
-mod generator;
-mod handler;
-mod project;
-mod provider;
-mod template;
 mod config;
+mod extras;
+mod modules;
 extern crate dirs;
 use clap::{Parser, Subcommand};
 use colored::*;
-use handler::{EgnitelyHandler, EgnitelyResource};
+use modules::{function, project, authn, global};
 
 #[derive(Parser)]
 #[clap(author, version, about, long_about = None)]
@@ -22,31 +16,23 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    /// Push the function to Egnitely
-    Push {
-        #[clap(short, long)]
-        project: Option<String>,
-    },
-    /// Create a new Egnitely Function
-    Create {
-        #[clap(value_parser)]
-        name: Option<String>,
-    },
-    /// Create a new Egnitely Function
-    New {
-        #[clap(value_parser)]
-        name: Option<String>,
-    },
-    /// Apply a function template to a cloud environment
-    Apply {
-        #[clap(value_parser)]
-        file: Option<String>,
-    },
     /// List functions, templates or providers
     Get {
         #[clap(subcommand)]
         command: Option<GetCommands>,
     },
+    /// Create a new Egnitely Function
+    Generate {
+        #[clap(subcommand)]
+        command: Option<GenerateCommands>,
+    },
+    /// Apply a file to
+    Apply {
+        #[clap(value_parser)]
+        file: Option<String>,
+    },
+    /// Push the function to Egnitely
+    Push,
     /// Login to your Egnitely Account
     Login,
     /// Logout of your Egnitely Account
@@ -60,59 +46,45 @@ enum GetCommands {
     /// Get list of projects
     Projects,
     /// Get list of providers
-    Providers,
-    /// Get list of templates
-    Templates,
+    Applications,
 }
 
+#[derive(Subcommand)]
+enum GenerateCommands {
+    /// Generate function
+    Function {
+        #[clap(value_parser)]
+        name: Option<String>,
+    },
+}
 
 #[tokio::main]
 async fn main() {
     let cli = Cli::parse();
-    let egnitely = EgnitelyHandler::new();
     match &cli.command {
-        Some(Commands::Create { name }) => {
-            if let Some(_name) = name {
-                let res = egnitely.create_function(_name.clone());
-                match res {
-                    Ok(_res) => {}
-                    Err(err) => {
-                        println!(
-                            "{}",
-                            format!("Error: {}", err).red().bold()
-                            
-                        );
+        Some(Commands::Generate { command }) => {
+            if let Some(command) = command {
+                match command {
+                    GenerateCommands::Function { name } => {
+                        if let Some(name) = name {
+                            let res = function::command::create_function(name.clone());
+                            match res {
+                                Ok(_res) => {}
+                                Err(err) => {
+                                    println!("{}", format!("Error: {}", err).red().bold());
+                                }
+                            }
+                        }
                     }
                 }
             }
         }
-        Some(Commands::New { name }) => {
-            if let Some(_name) = name {
-                let res = egnitely.create_function(_name.clone());
-                match res {
-                    Ok(_res) => {}
-                    Err(err) => {
-                        println!(
-                            "{}",
-                            format!("Error: {}", err).red().bold()
-                            
-                        );
-                    }
-                }
-            }
-        }
-        Some(Commands::Push { project }) => {
-            if let Some(project) = project {
-                let res = egnitely.push_function(project.clone()).await;
-                match res {
-                    Ok(_res) => {}
-                    Err(err) => {
-                        println!(
-                            "{}",
-                            format!("Error: {}", err).red().bold()
-                            
-                        );
-                    }
+        Some(Commands::Push) => {
+            let res = function::command::push_function().await;
+            match res {
+                Ok(_res) => {}
+                Err(err) => {
+                    println!("{}", format!("Error: {}", err).red().bold());
                 }
             }
         }
@@ -120,73 +92,54 @@ async fn main() {
             if let Some(command) = command {
                 match command {
                     GetCommands::Functions => {
-                        let res = egnitely.get_resource(EgnitelyResource::Function).await;
+                        let res = function::command::get_function().await;
                         match res {
                             Ok(_res) => {}
                             Err(err) => {
-                                println!(
-                                    "{}",
-                                    format!("Error: {}", err).red().bold()
-                                    
-                                );
+                                println!("{}", format!("Error: {}", err).red().bold());
                             }
                         }
                     }
                     GetCommands::Projects => {
-                        let res = egnitely.get_resource(EgnitelyResource::Project).await;
+                        let res = project::command::get_projects().await;
                         match res {
                             Ok(_res) => {}
                             Err(err) => {
-                                println!(
-                                    "{}",
-                                    format!("Error: {}", err).red().bold()
-                                    
-                                );
+                                println!("{}", format!("Error: {}", err).red().bold());
                             }
                         }
                     }
-                    GetCommands::Providers => {
-                        let _res = egnitely.get_resource(EgnitelyResource::Provider);
-                    }
-                    GetCommands::Templates => {
-                        let _res = egnitely.get_resource(EgnitelyResource::AppTemplate);
+                    GetCommands::Applications => {
+                        // let _res = egnitely.get_resource(EgnitelyResource::Application);
                     }
                 }
             }
         }
         Some(Commands::Apply { file }) => {
             if let Some(_file) = file {
-                let _res = egnitely.apply_template(_file.clone());
+                let _res = global::command::apply_resource(_file.clone()).await;
             }
         }
         Some(Commands::Login) => {
-            let res = egnitely.login().await;
+            let res = authn::command::login().await;
             match res {
                 Ok(_res) => {}
                 Err(err) => {
-                    println!(
-                        "{}",
-                        format!("{}: {}", "Error", err)
-                        
-                    );
+                    println!("{}", format!("{}: {}", "Error", err));
                 }
             }
         }
         Some(Commands::Logout) => {
-            let res = egnitely.logout().await;
+            let res = authn::command::logout().await;
             match res {
                 Ok(_res) => {}
                 Err(err) => {
-                    println!(
-                        "{}",
-                        format!("Error: {}", err).red().bold()
-                        
-                    );
+                    println!("{}", format!("Error: {}", err).red().bold());
                 }
             }
         }
         None => {
-            println!("Please type `egnite --help` to see list of commands")
+            println!("Lost? type `egnitely --help` to see list of commands")
         }
     }
 }

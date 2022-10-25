@@ -1,42 +1,16 @@
+use std::{error::Error, collections::HashMap, path::Path, fs, thread, time};
 use colored::*;
-use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use std::path::Path;
-use std::{collections::HashMap, error::Error};
-use std::{fs, thread, time};
+use pickledb::{PickleDbDumpPolicy, SerializationMethod, PickleDb};
+use serde_json::{Value, json};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct DeviceCodeResponse {
-    user_code: String,
-    device_code: String,
-    expires_in: u64,
-    interval: u64,
-    verification_uri: String,
-    verification_uri_complete: String,
-}
+use crate::modules::authn::entities::{DeviceCodeResponse, TokenErrorResponse, TokenSuccessResponse};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TokenErrorResponse {
-    error: String,
-    error_description: String,
-}
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct TokenSuccessResponse {
-    access_token: String,
-    id_token: String,
-    refresh_token: String,
-    scope: String,
-    token_type: String,
-    expires_in: u64,
-}
+pub struct AuthNService {}
 
-pub struct EgnitelyAuthN {}
-
-impl EgnitelyAuthN {
+impl AuthNService {
     pub fn new() -> Self {
-        EgnitelyAuthN {}
+        AuthNService {}
     }
 
     pub async fn login(&self) -> Result<Value, Box<dyn Error>> {

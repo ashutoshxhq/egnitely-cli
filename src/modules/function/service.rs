@@ -1,4 +1,3 @@
-pub mod entities;
 use colored::Colorize;
 use pickledb::PickleDb;
 use pickledb::PickleDbDumpPolicy;
@@ -21,19 +20,19 @@ use zip::write::FileOptions;
 use crate::config::get_server_url;
 use crate::extras::error::CLIError;
 use crate::extras::response::EgnitelyResponse;
-use crate::function::entities::FunctionResponse;
+use crate::modules::function::entities::FunctionResponse;
 
-use self::entities::ProjectResponse;
+use super::entities::ProjectResponse;
 
-pub struct Function {
+pub struct FunctionService {
     pub name: String,
     pub version: String,
     pub description: String,
 }
 
-impl Function {
+impl FunctionService {
     pub fn new(name: String, version: String, description: String) -> Self {
-        Function {
+        FunctionService {
             name,
             version,
             description,

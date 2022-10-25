@@ -1,7 +1,7 @@
 [package]
-name = "egnite"
+name = "egnitely"
 version = "0.1.6"
-description = "Egnite is a CLI tool for developing, publishing and managing Egnitely Functions"
+description = "Egnitely CLI helps developers build, manage and deploy functions/applications"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 homepage = "https://egnitely.com/"

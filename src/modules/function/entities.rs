@@ -29,3 +29,16 @@ pub struct ProjectResponse {
     pub created_at: NaiveDateTime,
 }
 
+#[derive(Deserialize, Clone)]
+pub struct CargoTomlSchema {
+    pub package: Package,
+}
+
+#[derive(Deserialize, Clone)]
+pub struct Package {
+    pub name: String,
+    pub description: Option<String>,
+    pub version: String,
+    pub project: Option<String>,
+}
+

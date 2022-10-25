@@ -1,17 +1,15 @@
 use std::error::Error;
 use pickledb::{PickleDb, PickleDbDumpPolicy, SerializationMethod};
 use prettytable::{Table, row};
-use crate::{extras::response::EgnitelyResponse, config::get_server_url};
-use self::entities::ProjectResponse;
-pub mod entities;
+use crate::{extras::response::EgnitelyResponse, config::get_server_url, modules::project::entities::ProjectResponse};
 
-pub struct Project {
+pub struct ProjectService {
     pub name: String,
 }
 
-impl Project {
+impl ProjectService {
     pub fn new(name: String) -> Self {
-        Project { name }
+        ProjectService { name }
     }
 
     pub async fn get_projects(&self) -> Result<(), Box<dyn Error>> {
