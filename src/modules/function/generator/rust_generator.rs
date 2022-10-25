@@ -11,7 +11,7 @@ impl RustGenerator {
     }
 
     pub fn generate_lib(&self) -> Result<(), Box<dyn Error>> {
-        let lib_rs = "use egnitely_client::{Json, Error};\nuse serde_json::{json, Value};\n\npub async fn handler(Json(data): Json<Value>) -> Result<Value, Error> {\n\t// TODO: IMPLEMENT FUNCTION\n\t\n\tOk(json!({\n\t\t    \"message\": \"function executed successfully\"\n\t}))\n}\n\n#[cfg(test)]\nmod tests {\n\t use super::*;\n\n\t#[tokio::test]\n\tasync fn trigger_handler() {\n\n\t\tlet resp = handler(\n\t\t\tContext::new(\"test\".to_string(), \"0.1.0\".to_string(), json!({}), json!({})),\n\t\t\tjson!({}),\n\t\t)\n\t\t.await\n\t\t.unwrap();\n\t\t\n\t\tassert_eq!(\"function executed successfully\", resp[\"message\"])\n\t}\n}\n".to_string();
+        let lib_rs = "use egnitely_client::{Context, Error};\nuse serde_json::{json, Value};\n\npub async fn handler(context: Context) -> Result<Value, Error> {\n\t// TODO: IMPLEMENT FUNCTION\n\t\n\tOk(json!({\n\t\t    \"message\": \"function executed successfully\"\n\t}))\n}\n\n#[cfg(test)]\nmod tests {\n\t use super::*;\n\n\t#[tokio::test]\n\tasync fn trigger_handler() {\n\n\t\tlet resp = handler(\n\t\t\tContext::new(\"test\".to_string(), \"0.1.0\".to_string(), json!({}), json!({})),\n\t\t\tjson!({}),\n\t\t)\n\t\t.await\n\t\t.unwrap();\n\t\t\n\t\tassert_eq!(\"function executed successfully\", resp[\"message\"])\n\t}\n}\n".to_string();
 
         let mut cargo_toml = "[package] \nname = \"".to_string();
         cargo_toml.push_str(&self.name);
